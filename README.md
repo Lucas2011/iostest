@@ -1,5 +1,58 @@
-Onboarding Documentation
-Objective:
+ #import <Foundation/Foundation.h>
+
+void listFilesInDirectory(NSString *directoryPath, NSInteger maxDepth) {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    // Check if the path is a directory
+    BOOL isDirectory;
+    BOOL exists = [fileManager fileExistsAtPath:directoryPath isDirectory:&isDirectory];
+
+    if (exists && isDirectory) {
+        // Call the recursive method to list files
+        listFilesInDirectoryRecursive(directoryPath, 0, maxDepth);
+    } else {
+        NSLog(@"Invalid directory path or not a directory.");
+    }
+}
+
+void listFilesInDirectoryRecursive(NSString *directoryPath, NSInteger currentDepth, NSInteger maxDepth) {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    NSError *error;
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:directoryPath error:&error];
+
+    if (!error) {
+        // Print files in the current directory
+        for (NSString *file in contents) {
+            NSLog(@"File: %@", file);
+        }
+
+        // Check if currentDepth is less than maxDepth
+        if (currentDepth < maxDepth) {
+            // Recursively call the method for each subdirectory
+            for (NSString *subDirectory in contents) {
+                NSString *subDirectoryPath = [directoryPath stringByAppendingPathComponent:subDirectory];
+                listFilesInDirectoryRecursive(subDirectoryPath, currentDepth + 1, maxDepth);
+            }
+        }
+    } else {
+        NSLog(@"Error reading directory: %@", error.localizedDescription);
+    }
+}
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        // Specify the path to the main directory
+        NSString *mainDirectoryPath = @"/path/to/your/directory";
+
+        // Set the maximum depth for recursive checking
+        NSInteger maxDepth = 2;
+
+        // Call the method to list files in the directory
+        listFilesInDirectory(mainDirectoryPath, maxDepth);
+    }
+    return 0;
+}
 The objective of the Onboarding Documentation is to provide new members with the necessary information and guidance to quickly familiarize themselves with the work environment, tools, and daily workflows. This comprehensive document aims to ensure a smooth onboarding process and facilitate efficient integration into the team.
 Content:
 The Onboarding Documentation includes the following sections:
