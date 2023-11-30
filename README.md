@@ -1,4 +1,31 @@
- #import <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSArray *dataArray = @[
+            @"111-222",
+            @"111-2223",
+            @"123-456",
+            @"123-789"
+        ];
+
+        NSString *pattern = @"111-22*"; // '111-22*' represents the pattern you want
+
+        // Construct the predicate format with 'LIKE' operator and add a wildcard '*'
+        NSString *predicateFormat = [NSString stringWithFormat:@"self LIKE[cd] '%@'", [pattern stringByReplacingOccurrencesOfString:@"*" withString:@"%"]];
+
+        // Use NSPredicate to filter array based on the pattern
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateFormat];
+        NSArray *filteredArray = [dataArray filteredArrayUsingPredicate:predicate];
+
+        // Print the result
+        NSLog(@"Result: %@", filteredArray);
+    }
+    return 0;
+}
+
+
+#import <Foundation/Foundation.h>
 
 void listFilesInDirectory(NSString *directoryPath, NSInteger maxDepth) {
     NSFileManager *fileManager = [NSFileManager defaultManager];
