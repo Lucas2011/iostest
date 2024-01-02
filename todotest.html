@@ -1,11 +1,79 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-    <head>
-        <title>OrderMeet</title>
-    </head>
-    <body>
-        <ul>
-            <li><a href="itms-services://?action=download-manifest&url=https://raw.githubusercontent.com/Lucas2011/iostest/master/test.plist"> Free to download</a>
-            </li>
-        </ul> 
-    </body> </html>
+#import "CoreDataSingleton.h"
+
+@implementation CoreDataSingleton
+
++ (instancetype)sharedInstance {
+    static CoreDataSingleton *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self alloc] init];
+    });
+    return sharedInstance;
+}
+
+- (NSPersistentContainer *)persistentContainer {
+    @synchronized (self) {
+        if (!_persistentContainer) {
+            _persistentContainer = [[NSPersistentContainer alloc] initWithName:@"YourDataModelName"];
+            [_persistentContainer loadPersistentStoresWithCompletionHandler:^(NSPersistentStoreDescription *storeDescription, NSError *error) {
+                if (error) {
+                    NSLog(@"Unresolved error %@, %@", error, error.userInfo);
+                    abort();
+                }
+            }];
+        }
+    }
+    return _persistentContainer;
+}
+
+- (void)saveContext {
+    NSManagedObjectContext *context = [self currentContext];
+    NSError *error = nil;
+    if ([context hasChanges] && ![context save:&error]) {
+        NSLog(@"Unresolved error %@, %@", error, error.userInfo);
+        abort();
+    }
+}
+
+- (NSManagedObject *)insertEntityWithName:(NSString *)entityName {
+    NSManagedObjectContext *context = [self currentContext];
+    NSManagedObject *newEntity = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:context];
+    return newEntity;
+}
+
+- (NSArray *)fetchEntitiesWithName:(NSString *)entityName predicate:(NSPredicate *)predicate sortDescriptors:(NSArray<NSSortDescriptor *> *)sortDescriptors {
+    NSManagedObjectContext *context = [self currentContext];
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entityName];
+    fetchRequest.predicate = predicate;
+    fetchRequest.sortDescriptors = sortDescriptors;
+    NSError *error = nil;
+    NSArray *result = [context executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error %@, %@", error, error.userInfo);
+    }
+    return result;
+}
+
+- (void)updateEntity:(NSManagedObject *)entity {
+    NSManagedObjectContext *context = [self currentContext];
+    NSError *error = nil;
+    if (![context save:&error]) {
+        NSLog(@"Update error %@, %@", error, error.userInfo);
+    }
+}
+
+- (void)deleteEntity:(NSManagedObject *)entity {
+    NSManagedObjectContext *context = [self currentContext];
+    [context deleteObject:entity];
+    [self saveContext];
+}
+
+- (NSManagedObjectContext *)currentContext {
+    if ([NSThread isMainThread]) {
+        return self.persistentContainer.viewContext;
+    } else {
+        return self.persistentContainer.newBackgroundContext;
+    }
+}
+
+@end
