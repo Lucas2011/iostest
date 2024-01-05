@@ -1,5 +1,1 @@
-find /Users/lucas/Desktop/111/ -type f -name 'log-bb-12-13-14*' ! -name '*.json' -exec mv {} /Users/lucas/Desktop/111/b/ \;
-
-
-
-find /source_path -type f \( -name 'bb-*' ! -name '*.json' \) -o -type d \( -name 'bb-*' ! -name '*.json' \) -exec mv {} /b \;
+find /source_path -type f \( -name 'log-bb-*' ! -name '*.json' -o -name '*.tar' \) -o -type d -name 'log-bb-*' ! -name '*.json' -exec mv {} /b \;
