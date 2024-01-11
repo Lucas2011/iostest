@@ -1,1 +1,33 @@
-find /source_path \( -type f -name 'log-bb-*' ! -name '*.json' -o -name '*.tar' \) -o \( -type d -name 'log-bb-*' ! -name '*.json' \) -exec mv {} /b \;
+// 假设 fetchedObjects 是包含 Core Data 数据的数组，而且数组中的元素是 Core Data 实体类型
+
+- (void)Aaa:(NSArray<Entity *> *)updatedData {
+    // 在 Aaa 函数中遍历传递进来的数组并更新 Core Data 数据
+    for (Entity *updatedEntity in updatedData) {
+        // 获取对应的 Core Data 对象（可能需要根据唯一标识符或其他属性进行匹配）
+        NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Entity"];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"uniqueIdentifier == %@", updatedEntity.uniqueIdentifier]; // 替换为实际的匹配条件
+
+        NSError *error = nil;
+        NSArray *matchingEntities = [context executeFetchRequest:fetchRequest error:&error];
+
+        if (error) {
+            NSLog(@"Error fetching matching entities: %@", error);
+        } else {
+            // 更新匹配到的 Core Data 对象
+            Entity *coreDataEntity = [matchingEntities firstObject];
+            if (coreDataEntity) {
+                // 修改数据的某些值
+                // coreDataEntity.property = updatedEntity.property;
+            }
+        }
+    }
+
+    // 保存上下文以将更改持久化到 Core Data
+    NSError *error = nil;
+    if (![context save:&error]) {
+        NSLog(@"Error saving context: %@", error);
+    }
+}
+
+// 在其他地方调用 Aaa 函数并传递已修改的数据
+[self Aaa:fetchedObjects];
